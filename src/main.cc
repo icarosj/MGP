@@ -8,7 +8,7 @@
 #include "matmul.h"
 
 template <class T>
-void run(long Dim, int bsize)
+void run(long Dim, int bsize, std::ofstream *of)
 {
   long size = Dim*Dim;
   T *A = new T[size];
@@ -50,7 +50,6 @@ void run(long Dim, int bsize)
   diff = end-start;
   std::cout<<"init arrays took "<<diff.count()<<" sec"<<std::endl;
 
-//goto copy;
 
 
 
@@ -61,6 +60,7 @@ void run(long Dim, int bsize)
   diff = end-start;
   std::cout<<"normal matmul took "<<diff.count()<<" sec"<<std::endl;
 	std::cout<<std::endl;
+  (*of)<<diff.count()<<", ";
 
   //transposed matmul
   start = std::chrono::steady_clock::now();
@@ -69,6 +69,7 @@ void run(long Dim, int bsize)
   diff = end-start;
   std::cout<<"tp matmul took "<<diff.count()<<" sec"<<std::endl;
 	std::cout<<std::endl;
+  (*of)<<diff.count()<<", ";
 
 
   //block matmul
@@ -78,6 +79,7 @@ void run(long Dim, int bsize)
   diff = end-start;
   std::cout<<"block matmul took "<<diff.count()<<" sec"<<std::endl;
 	std::cout<<std::endl;
+  (*of)<<diff.count()<<", ";
   
 
   //block matmul2
@@ -87,6 +89,7 @@ void run(long Dim, int bsize)
   diff = end-start;
   std::cout<<"tp block matmul took "<<diff.count()<<" sec"<<std::endl;
 	std::cout<<std::endl;
+  (*of)<<diff.count()<<", ";
   
 //tpblock matmul2
   start = std::chrono::steady_clock::now();
@@ -95,6 +98,7 @@ void run(long Dim, int bsize)
   diff = end-start;
   std::cout<<"block matmul_alt took "<<diff.count()<<" sec"<<std::endl;
 	std::cout<<std::endl;
+  (*of)<<diff.count()<<", ";
 
 
 //2D arrays
@@ -106,6 +110,7 @@ void run(long Dim, int bsize)
   diff = end-start;
   std::cout<<"2D normal matmul took "<<diff.count()<<" sec"<<std::endl;
 	std::cout<<std::endl;
+  (*of)<<diff.count()<<", ";
 
   //transposed matmul
   start = std::chrono::steady_clock::now();
@@ -114,6 +119,7 @@ void run(long Dim, int bsize)
   diff = end-start;
   std::cout<<"2D tp matmul took "<<diff.count()<<" sec"<<std::endl;
 	std::cout<<std::endl;
+  (*of)<<diff.count()<<", ";
 
 
   //block matmul
@@ -123,6 +129,7 @@ void run(long Dim, int bsize)
   diff = end-start;
   std::cout<<"2D block matmul took "<<diff.count()<<" sec"<<std::endl;
 	std::cout<<std::endl;
+  (*of)<<diff.count()<<", ";
   
 
   //block matmul2
@@ -132,6 +139,7 @@ void run(long Dim, int bsize)
   diff = end-start;
   std::cout<<"2D tp block matmul took "<<diff.count()<<" sec"<<std::endl;
 	std::cout<<std::endl;
+  (*of)<<diff.count()<<", ";
   
 //tpblock matmul2
   start = std::chrono::steady_clock::now();
@@ -140,9 +148,9 @@ void run(long Dim, int bsize)
   diff = end-start;
   std::cout<<"2D block matmul_alt took "<<diff.count()<<" sec"<<std::endl;
 	std::cout<<std::endl;
+  (*of)<<diff.count()<<", ";
 
 
-copy:
   //copied matmul
   start = std::chrono::steady_clock::now();
   MultiplyRef1D(Dim, bsize, A, B, copyC);
@@ -150,6 +158,7 @@ copy:
   diff = end-start;
   std::cout<<"copy matmul took "<<diff.count()<<" sec"<<std::endl;
 	std::cout<<std::endl;
+  (*of)<<diff.count()<<", ";
   
 
   //copied matmul2
@@ -159,6 +168,7 @@ copy:
   diff = end-start;
   std::cout<<"copy matmul2 took "<<diff.count()<<" sec"<<std::endl;
 	std::cout<<std::endl;
+  (*of)<<diff.count()<<", ";
  
   //copied matmul3
   start = std::chrono::steady_clock::now();
@@ -167,6 +177,7 @@ copy:
   diff = end-start;
   std::cout<<"copy matmul3 took "<<diff.count()<<" sec"<<std::endl;
 	std::cout<<std::endl;
+  (*of)<<diff.count()<<", ";
   
   /*
   std::cout<<"A = ["<<std::endl;
@@ -242,11 +253,17 @@ int main(int argc, char* argv[])
   long bsize= atoi(argv[2]);
   int debug_level= atoi(argv[3]);
 	std::string outfile = std::string(argv[4]);
+
+  std::ofstream of(outfile, std::fstream::app);
   clog::SetLevel(debug_level);
   std::cout<<"Mat Size "<<Dim<<", "<<Dim<<std::endl;
 
-	run<int>(Dim, bsize);
-	run<float>(Dim, bsize);
+  of<<GIT_VERSION<<", int, "<<Dim<<", "<<bsize<<", ";
+	run<int>(Dim, bsize, &of);
+  of<<std::endl;
+  of<<GIT_VERSION<<", float, "<<Dim<<", "<<bsize<<", ";
+  of<<std::endl;
+	run<float>(Dim, bsize, &of);
 
 return 0;
 }

@@ -331,6 +331,7 @@ void MultiplyRef1D(int n, int block, T* a, T* b, T* c)
         for(i=0; i<blockSize; i++)
           for(j=0; j<blockSize; j++)
             for(k=0; k<blockSize; k++)
+              if(bi+i < n && bj+j < n && bk+k < n)
               c[(bi+i)*n+bj+j] += a[(bi+i)*n+bk+k]*b[(bk+k)*n+bj+j];
 }
 
@@ -351,9 +352,10 @@ void MultiplyRef2D(int n, int block, T** a, T** b, T** c)
         for(i=0; i<blockSize; i++)
           for(j=0; j<blockSize; j++)
             for(k=0; k<blockSize; k++)
+              if(bi+i < n && bj+j < n && bk+k < n)
               c[bi+i][bj+j] += 
                 a[bi+i][bk+k]
-                *b[bk+k][bj+j];
+                * b[bk+k][bj+j];
 }
   template <class T>
 void MultiplyBase2D(int n, T** a, T** b, T** c)
