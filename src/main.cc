@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <fstream>
 #include "clog.h"
 #include "p_assert.h"
 #include "backtrace.h"
@@ -89,17 +90,62 @@ void run(long Dim, int bsize)
   
 //tpblock matmul2
   start = std::chrono::steady_clock::now();
-  block_matmul2(Dim, bsize, A, B, tpblkC);
+  block_matmul_alt(Dim, bsize, A, B, tpblkC);
   end = std::chrono::steady_clock::now();
   diff = end-start;
-  std::cout<<"block matmul2 took "<<diff.count()<<" sec"<<std::endl;
+  std::cout<<"block matmul_alt took "<<diff.count()<<" sec"<<std::endl;
+	std::cout<<std::endl;
+
+
+//2D arrays
+
+  //do naive matmul
+  start = std::chrono::steady_clock::now();
+  naive_matmul2D(Dim, A2, B2, C2);
+  end = std::chrono::steady_clock::now();
+  diff = end-start;
+  std::cout<<"2D normal matmul took "<<diff.count()<<" sec"<<std::endl;
+	std::cout<<std::endl;
+
+  //transposed matmul
+  start = std::chrono::steady_clock::now();
+  tp_matmul2D(Dim, A2, B2, C2);
+  end = std::chrono::steady_clock::now();
+  diff = end-start;
+  std::cout<<"2D tp matmul took "<<diff.count()<<" sec"<<std::endl;
+	std::cout<<std::endl;
+
+
+  //block matmul
+  start = std::chrono::steady_clock::now();
+  block_matmul2D(Dim, bsize, A2, B2, C2);
+  end = std::chrono::steady_clock::now();
+  diff = end-start;
+  std::cout<<"2D block matmul took "<<diff.count()<<" sec"<<std::endl;
+	std::cout<<std::endl;
+  
+
+  //block matmul2
+  start = std::chrono::steady_clock::now();
+  tp_block_matmul2D(Dim, bsize, A2, B2, C2);
+  end = std::chrono::steady_clock::now();
+  diff = end-start;
+  std::cout<<"2D tp block matmul took "<<diff.count()<<" sec"<<std::endl;
+	std::cout<<std::endl;
+  
+//tpblock matmul2
+  start = std::chrono::steady_clock::now();
+  block_matmul_alt2D(Dim, bsize, A2, B2, C2);
+  end = std::chrono::steady_clock::now();
+  diff = end-start;
+  std::cout<<"2D block matmul_alt took "<<diff.count()<<" sec"<<std::endl;
 	std::cout<<std::endl;
 
 
 copy:
   //copied matmul
   start = std::chrono::steady_clock::now();
-  Multiply(Dim, bsize, A, B, copyC);
+  MultiplyRef1D(Dim, bsize, A, B, copyC);
   end = std::chrono::steady_clock::now();
   diff = end-start;
   std::cout<<"copy matmul took "<<diff.count()<<" sec"<<std::endl;
@@ -108,7 +154,7 @@ copy:
 
   //copied matmul2
   start = std::chrono::steady_clock::now();
-  Multiply2(Dim, bsize, A2, B2, C2);
+  MultiplyRef2D(Dim, bsize, A2, B2, C2);
   end = std::chrono::steady_clock::now();
   diff = end-start;
   std::cout<<"copy matmul2 took "<<diff.count()<<" sec"<<std::endl;
@@ -116,7 +162,7 @@ copy:
  
   //copied matmul3
   start = std::chrono::steady_clock::now();
-  Multiply3(Dim, A2, B2, C2);
+  MultiplyBase2D(Dim, A2, B2, C2);
   end = std::chrono::steady_clock::now();
   diff = end-start;
   std::cout<<"copy matmul3 took "<<diff.count()<<" sec"<<std::endl;
@@ -195,10 +241,12 @@ int main(int argc, char* argv[])
   long Dim = atoi(argv[1]);
   long bsize= atoi(argv[2]);
   int debug_level= atoi(argv[3]);
+	std::string outfile = std::string(argv[4]);
   clog::SetLevel(debug_level);
   std::cout<<"Mat Size "<<Dim<<", "<<Dim<<std::endl;
 
-run<float>(Dim, bsize);
+	run<int>(Dim, bsize);
+	run<float>(Dim, bsize);
 
 return 0;
 }
