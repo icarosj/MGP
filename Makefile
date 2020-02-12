@@ -3,7 +3,7 @@
 #CXXFLAGS = -g -std=c++11 -Wall -Wextra -Wno-sign-compare -O3
 CXX = g++
 #CXX = /opt/anaconda3/pkgs/openmpi-3.1.3-495.g7c31c37/bin/mpiCC 
-CXXFLAGS = -g -std=c++11 -Wall -Wno-sign-compare -O3 -DGIT_VERSION=\"$(GIT_VERSION)\" 
+CXXFLAGS = -g -std=c++11 -Wall -Wnarrowing -Wnarrowing -Wno-sign-compare -O3 -DGIT_VERSION=\"$(GIT_VERSION)\" 
 
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
 DATE:= $(shell date)
