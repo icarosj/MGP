@@ -262,8 +262,8 @@ int main(int argc, char* argv[])
 	run<int>(Dim, bsize, &of);
   of<<std::endl;
   of<<GIT_VERSION<<", float, "<<Dim<<", "<<bsize<<", ";
-  of<<std::endl;
 	run<float>(Dim, bsize, &of);
+  of<<std::endl;
 
 return 0;
 }
