@@ -6,10 +6,13 @@
 #include "backtrace.h"
 #include "answer_64_64.h"
 #include "matmul.h"
+#include "typeutil.h"
 
 template <class T>
 void run(long Dim, int bsize, std::ofstream *of)
 {
+  std::string type= getType<T>();
+  //of<<type.c_str();
   long size = Dim*Dim;
   T *A = new T[size];
   T *B = new T[size];
@@ -25,10 +28,10 @@ void run(long Dim, int bsize, std::ofstream *of)
   T **B2 = new T*[Dim];
   T **C2 = new T*[Dim];
   for(int r=0; r<Dim; r++) {
-		A2[r] = new T[Dim];
-		B2[r] = new T[Dim];
-		C2[r] = new T[Dim];
-	}
+    A2[r] = new T[Dim];
+    B2[r] = new T[Dim];
+    C2[r] = new T[Dim];
+  }
 
   /* intialize */
   std::chrono::duration<double> diff;
@@ -51,196 +54,199 @@ void run(long Dim, int bsize, std::ofstream *of)
   std::cout<<"init arrays took "<<diff.count()<<" sec"<<std::endl;
 
 
+  for(int i=0;i<2;i++) {
 
-
-  //do naive matmul
-  start = std::chrono::steady_clock::now();
-  naive_matmul(Dim, A, B, C);
-  end = std::chrono::steady_clock::now();
-  diff = end-start;
-  std::cout<<"normal matmul took "<<diff.count()<<" sec"<<std::endl;
-	std::cout<<std::endl;
-  (*of)<<diff.count()<<", ";
-
-  //transposed matmul
-  start = std::chrono::steady_clock::now();
-  tp_matmul(Dim, A, B, tpC);
-  end = std::chrono::steady_clock::now();
-  diff = end-start;
-  std::cout<<"tp matmul took "<<diff.count()<<" sec"<<std::endl;
-	std::cout<<std::endl;
-  (*of)<<diff.count()<<", ";
-
-
-  //block matmul
-  start = std::chrono::steady_clock::now();
-  block_matmul(Dim, bsize, A, B, blkC);
-  end = std::chrono::steady_clock::now();
-  diff = end-start;
-  std::cout<<"block matmul took "<<diff.count()<<" sec"<<std::endl;
-	std::cout<<std::endl;
-  (*of)<<diff.count()<<", ";
-  
-
-  //block matmul2
-  start = std::chrono::steady_clock::now();
-  tp_block_matmul(Dim, bsize, A, B, blkC2);
-  end = std::chrono::steady_clock::now();
-  diff = end-start;
-  std::cout<<"tp block matmul took "<<diff.count()<<" sec"<<std::endl;
-	std::cout<<std::endl;
-  (*of)<<diff.count()<<", ";
-  
-//tpblock matmul2
-  start = std::chrono::steady_clock::now();
-  block_matmul_alt(Dim, bsize, A, B, tpblkC);
-  end = std::chrono::steady_clock::now();
-  diff = end-start;
-  std::cout<<"block matmul_alt took "<<diff.count()<<" sec"<<std::endl;
-	std::cout<<std::endl;
-  (*of)<<diff.count()<<", ";
-
-
-//2D arrays
-
-  //do naive matmul
-  start = std::chrono::steady_clock::now();
-  naive_matmul2D(Dim, A2, B2, C2);
-  end = std::chrono::steady_clock::now();
-  diff = end-start;
-  std::cout<<"2D normal matmul took "<<diff.count()<<" sec"<<std::endl;
-	std::cout<<std::endl;
-  (*of)<<diff.count()<<", ";
-
-  //transposed matmul
-  start = std::chrono::steady_clock::now();
-  tp_matmul2D(Dim, A2, B2, C2);
-  end = std::chrono::steady_clock::now();
-  diff = end-start;
-  std::cout<<"2D tp matmul took "<<diff.count()<<" sec"<<std::endl;
-	std::cout<<std::endl;
-  (*of)<<diff.count()<<", ";
-
-
-  //block matmul
-  start = std::chrono::steady_clock::now();
-  block_matmul2D(Dim, bsize, A2, B2, C2);
-  end = std::chrono::steady_clock::now();
-  diff = end-start;
-  std::cout<<"2D block matmul took "<<diff.count()<<" sec"<<std::endl;
-	std::cout<<std::endl;
-  (*of)<<diff.count()<<", ";
-  
-
-  //block matmul2
-  start = std::chrono::steady_clock::now();
-  tp_block_matmul2D(Dim, bsize, A2, B2, C2);
-  end = std::chrono::steady_clock::now();
-  diff = end-start;
-  std::cout<<"2D tp block matmul took "<<diff.count()<<" sec"<<std::endl;
-	std::cout<<std::endl;
-  (*of)<<diff.count()<<", ";
-  
-//tpblock matmul2
-  start = std::chrono::steady_clock::now();
-  block_matmul_alt2D(Dim, bsize, A2, B2, C2);
-  end = std::chrono::steady_clock::now();
-  diff = end-start;
-  std::cout<<"2D block matmul_alt took "<<diff.count()<<" sec"<<std::endl;
-	std::cout<<std::endl;
-  (*of)<<diff.count()<<", ";
-
-
-  //copied matmul
-  start = std::chrono::steady_clock::now();
-  MultiplyRef1D(Dim, bsize, A, B, copyC);
-  end = std::chrono::steady_clock::now();
-  diff = end-start;
-  std::cout<<"copy matmul took "<<diff.count()<<" sec"<<std::endl;
-	std::cout<<std::endl;
-  (*of)<<diff.count()<<", ";
-  
-
-  //copied matmul2
-  start = std::chrono::steady_clock::now();
-  MultiplyRef2D(Dim, bsize, A2, B2, C2);
-  end = std::chrono::steady_clock::now();
-  diff = end-start;
-  std::cout<<"copy matmul2 took "<<diff.count()<<" sec"<<std::endl;
-	std::cout<<std::endl;
-  (*of)<<diff.count()<<", ";
- 
-  //copied matmul3
-  start = std::chrono::steady_clock::now();
-  MultiplyBase2D(Dim, A2, B2, C2);
-  end = std::chrono::steady_clock::now();
-  diff = end-start;
-  std::cout<<"copy matmul3 took "<<diff.count()<<" sec"<<std::endl;
-	std::cout<<std::endl;
-  (*of)<<diff.count()<<", ";
-  
-  /*
-  std::cout<<"A = ["<<std::endl;
-  for(int r=0; r<Dim; r++) {
-    for(int c=0; c<Dim; c++) {
-      std::cout<<A[r*Dim + c]<<", ";
-    }
+    (*of)<<GIT_VERSION<<", "<<(getType<T>().c_str())<<", "<<Dim<<", "<<bsize<<", ";
+    //do naive matmul
+    start = std::chrono::steady_clock::now();
+    naive_matmul(Dim, A, B, C);
+    end = std::chrono::steady_clock::now();
+    diff = end-start;
+    std::cout<<"normal matmul took "<<diff.count()<<" sec"<<std::endl;
     std::cout<<std::endl;
-  }
-  std::cout<<"]"<<std::endl;
+    (*of)<<diff.count()<<", ";
 
-  std::cout<<"B = ["<<std::endl;
-  for(int r=0; r<Dim; r++) {
-    for(int c=0; c<Dim; c++) {
-      std::cout<<B[r*Dim + c]<<", ";
-    }
+    //transposed matmul
+    start = std::chrono::steady_clock::now();
+    tp_matmul(Dim, A, B, tpC);
+    end = std::chrono::steady_clock::now();
+    diff = end-start;
+    std::cout<<"tp matmul took "<<diff.count()<<" sec"<<std::endl;
     std::cout<<std::endl;
-  }
-  std::cout<<"]"<<std::endl;
-  */
-  
+    (*of)<<diff.count()<<", ";
 
-  if(Dim==64) {
-    clog::Write(Info, "checking answers against 64x64 truth..\n");
-    int num_err=0;
-    for(int r=0; r<Dim; r++) {
-      for(int c=0; c<Dim; c++) {
-        if(C[r*Dim + c] != answer_64_64[r*Dim + c]) {
-          num_err++;
-          //std::cout<<"["<<r<<"]["<<c<<"]: "<<C[r*Dim + c] <<" : "<<answer_64_64[r*Dim + c]<<std::endl;
+
+    //block matmul
+    start = std::chrono::steady_clock::now();
+    block_matmul(Dim, bsize, A, B, blkC);
+    end = std::chrono::steady_clock::now();
+    diff = end-start;
+    std::cout<<"block matmul took "<<diff.count()<<" sec"<<std::endl;
+    std::cout<<std::endl;
+    (*of)<<diff.count()<<", ";
+
+
+    //block matmul2
+    start = std::chrono::steady_clock::now();
+    tp_block_matmul(Dim, bsize, A, B, blkC2);
+    end = std::chrono::steady_clock::now();
+    diff = end-start;
+    std::cout<<"tp block matmul took "<<diff.count()<<" sec"<<std::endl;
+    std::cout<<std::endl;
+    (*of)<<diff.count()<<", ";
+
+    //tpblock matmul2
+    start = std::chrono::steady_clock::now();
+    block_matmul_alt(Dim, bsize, A, B, tpblkC);
+    end = std::chrono::steady_clock::now();
+    diff = end-start;
+    std::cout<<"block matmul_alt took "<<diff.count()<<" sec"<<std::endl;
+    std::cout<<std::endl;
+    (*of)<<diff.count()<<", ";
+
+
+    //2D arrays
+
+    //do naive matmul
+    start = std::chrono::steady_clock::now();
+    naive_matmul2D(Dim, A2, B2, C2);
+    end = std::chrono::steady_clock::now();
+    diff = end-start;
+    std::cout<<"2D normal matmul took "<<diff.count()<<" sec"<<std::endl;
+    std::cout<<std::endl;
+    (*of)<<diff.count()<<", ";
+
+    //transposed matmul
+    start = std::chrono::steady_clock::now();
+    tp_matmul2D(Dim, A2, B2, C2);
+    end = std::chrono::steady_clock::now();
+    diff = end-start;
+    std::cout<<"2D tp matmul took "<<diff.count()<<" sec"<<std::endl;
+    std::cout<<std::endl;
+    (*of)<<diff.count()<<", ";
+
+
+    //block matmul
+    start = std::chrono::steady_clock::now();
+    block_matmul2D(Dim, bsize, A2, B2, C2);
+    end = std::chrono::steady_clock::now();
+    diff = end-start;
+    std::cout<<"2D block matmul took "<<diff.count()<<" sec"<<std::endl;
+    std::cout<<std::endl;
+    (*of)<<diff.count()<<", ";
+
+
+    //block matmul2
+    start = std::chrono::steady_clock::now();
+    tp_block_matmul2D(Dim, bsize, A2, B2, C2);
+    end = std::chrono::steady_clock::now();
+    diff = end-start;
+    std::cout<<"2D tp block matmul took "<<diff.count()<<" sec"<<std::endl;
+    std::cout<<std::endl;
+    (*of)<<diff.count()<<", ";
+
+    //tpblock matmul2
+    start = std::chrono::steady_clock::now();
+    block_matmul_alt2D(Dim, bsize, A2, B2, C2);
+    end = std::chrono::steady_clock::now();
+    diff = end-start;
+    std::cout<<"2D block matmul_alt took "<<diff.count()<<" sec"<<std::endl;
+    std::cout<<std::endl;
+    (*of)<<diff.count()<<", ";
+
+
+    //copied matmul
+    start = std::chrono::steady_clock::now();
+    MultiplyRef1D(Dim, bsize, A, B, copyC);
+    end = std::chrono::steady_clock::now();
+    diff = end-start;
+    std::cout<<"copy matmul took "<<diff.count()<<" sec"<<std::endl;
+    std::cout<<std::endl;
+    (*of)<<diff.count()<<", ";
+
+
+    //copied matmul2
+    start = std::chrono::steady_clock::now();
+    MultiplyRef2D(Dim, bsize, A2, B2, C2);
+    end = std::chrono::steady_clock::now();
+    diff = end-start;
+    std::cout<<"copy matmul2 took "<<diff.count()<<" sec"<<std::endl;
+    std::cout<<std::endl;
+    (*of)<<diff.count()<<", ";
+
+    //copied matmul3
+    start = std::chrono::steady_clock::now();
+    MultiplyBase2D(Dim, A2, B2, C2);
+    end = std::chrono::steady_clock::now();
+    diff = end-start;
+    std::cout<<"copy matmul3 took "<<diff.count()<<" sec"<<std::endl;
+    std::cout<<std::endl;
+    (*of)<<diff.count()<<", ";
+
+    /*
+       std::cout<<"A = ["<<std::endl;
+       for(int r=0; r<Dim; r++) {
+       for(int c=0; c<Dim; c++) {
+       std::cout<<A[r*Dim + c]<<", ";
+       }
+       std::cout<<std::endl;
+       }
+       std::cout<<"]"<<std::endl;
+
+       std::cout<<"B = ["<<std::endl;
+       for(int r=0; r<Dim; r++) {
+       for(int c=0; c<Dim; c++) {
+       std::cout<<B[r*Dim + c]<<", ";
+       }
+       std::cout<<std::endl;
+       }
+       std::cout<<"]"<<std::endl;
+       */
+
+
+    if(Dim==64) {
+      clog::Write(Info, "checking answers against 64x64 truth..\n");
+      int num_err=0;
+      for(int r=0; r<Dim; r++) {
+        for(int c=0; c<Dim; c++) {
+          if(C[r*Dim + c] != answer_64_64[r*Dim + c]) {
+            num_err++;
+            //std::cout<<"["<<r<<"]["<<c<<"]: "<<C[r*Dim + c] <<" : "<<answer_64_64[r*Dim + c]<<std::endl;
+          }
         }
       }
+      clog::Write(Info, "Done. %d errors found.\n", num_err);
     }
-    clog::Write(Info, "Done. %d errors found.\n", num_err);
-  }
 
-  //naive versus tp check
-  {
-    clog::Write(Info, "checking answers naive:tp\n");
-    int num_err=0;
-    for(int r=0; r<Dim; r++) {
-      for(int c=0; c<Dim; c++) {
-        if(C[r*Dim + c] != tpC[r*Dim + c]) {
-          num_err++;
-          //std::cout<<"["<<r<<"]["<<c<<"]: "<<C[r*Dim + c] <<" : "<<tpC[r*Dim + c]<<std::endl;
+    //naive versus tp check
+    {
+      clog::Write(Info, "checking answers naive:tp\n");
+      int num_err=0;
+      for(int r=0; r<Dim; r++) {
+        for(int c=0; c<Dim; c++) {
+          if(C[r*Dim + c] != tpC[r*Dim + c]) {
+            num_err++;
+            //std::cout<<"["<<r<<"]["<<c<<"]: "<<C[r*Dim + c] <<" : "<<tpC[r*Dim + c]<<std::endl;
+          }
         }
       }
+      clog::Write(Info, "Done. %d errors found.\n", num_err);
     }
-    clog::Write(Info, "Done. %d errors found.\n", num_err);
-  }
 
-{
-    clog::Write(Info, "checking answers naive:blk\n");
-    int num_err=0;
-    for(int r=0; r<Dim; r++) {
-      for(int c=0; c<Dim; c++) {
-        if(C[r*Dim + c] != tpC[r*Dim + c]) {
-          num_err++;
-          //std::cout<<"["<<r<<"]["<<c<<"]: "<<C[r*Dim + c] <<" : "<<blkC[r*Dim + c]<<std::endl;
+    {
+      clog::Write(Info, "checking answers naive:blk\n");
+      int num_err=0;
+      for(int r=0; r<Dim; r++) {
+        for(int c=0; c<Dim; c++) {
+          if(C[r*Dim + c] != tpC[r*Dim + c]) {
+            num_err++;
+            //std::cout<<"["<<r<<"]["<<c<<"]: "<<C[r*Dim + c] <<" : "<<blkC[r*Dim + c]<<std::endl;
+          }
         }
       }
+      clog::Write(Info, "Done. %d errors found.\n", num_err);
     }
-    clog::Write(Info, "Done. %d errors found.\n", num_err);
+  (*of)<<std::endl;
   }
 }
 
@@ -258,12 +264,8 @@ int main(int argc, char* argv[])
   clog::SetLevel(debug_level);
   std::cout<<"Mat Size "<<Dim<<", "<<Dim<<std::endl;
 
-  of<<GIT_VERSION<<", int, "<<Dim<<", "<<bsize<<", ";
-	run<int>(Dim, bsize, &of);
-  of<<std::endl;
-  of<<GIT_VERSION<<", float, "<<Dim<<", "<<bsize<<", ";
+	//run<int>(Dim, bsize, &of);
 	run<float>(Dim, bsize, &of);
-  of<<std::endl;
 
 return 0;
 }
